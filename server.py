@@ -31,8 +31,7 @@ ADMIN_USERNAME = os.getenv("ADMIN_USERNAME")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 GA4_PROPERTY_ID = os.getenv("GA4_PROPERTY_ID")
 
-# json_path = os.path.join(os.path.dirname(__file__), "analytics.json")
-# credentials = service_account.Credentials.from_service_account_file(json_path)
+
 
 ga_base64 = os.getenv("GA_SERVICE_ACCOUNT_BASE64")
 
