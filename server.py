@@ -8,6 +8,10 @@ from dotenv import load_dotenv
 import os
 import secrets
 from fastapi import FastAPI, HTTPException, Depends, Query
+import json
+from google.oauth2 import service_account
+import base64
+
 
 
 load_dotenv()
@@ -26,6 +30,23 @@ app.add_middleware(
 ADMIN_USERNAME = os.getenv("ADMIN_USERNAME")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 GA4_PROPERTY_ID = os.getenv("GA4_PROPERTY_ID")
+
+# json_path = os.path.join(os.path.dirname(__file__), "analytics.json")
+# credentials = service_account.Credentials.from_service_account_file(json_path)
+
+ga_base64 = os.getenv("GA_SERVICE_ACCOUNT_BASE64")
+
+if not ga_base64:
+    raise RuntimeError("GA_SERVICE_ACCOUNT_BASE64 not set")
+
+service_account_info = json.loads(
+    base64.b64decode(ga_base64).decode("utf-8")
+)
+
+credentials = service_account.Credentials.from_service_account_info(
+    service_account_info
+)
+
 
 def verify_admin(credentials: HTTPBasicCredentials = Depends(security)):
     is_username_correct = secrets.compare_digest(credentials.username, ADMIN_USERNAME)
@@ -84,7 +105,7 @@ def get_analytics(
     admin: str = Depends(verify_admin)
 ):
     try:
-        client = BetaAnalyticsDataClient()
+        client = BetaAnalyticsDataClient(credentials=credentials)
 
         # ── Calculate date range ────────────────────────────────────────
         today = datetime.now().date()
